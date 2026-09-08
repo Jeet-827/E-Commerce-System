@@ -12,6 +12,7 @@ import OrderRoute from "./routes/order.routes.js";
 import SearchRoute from "./routes/search.routes.js";
 import RazorPay from "./routes/razor.routes.js";
 import cors from "cors";
+import { getCacheStats, flushAllCache } from "./utils/cache.js";
 
 const app = express();
 
@@ -68,7 +69,20 @@ app.use("/api/v1/order", OrderRoute);
 app.use("/api/v1/ordergenereted", OrderRoute);
 app.use("/api/v1/orderdata", OrderRoute);
 app.use("/api/v1/search", SearchRoute);
-app.use("/api/v1/make",RazorPay)
+app.use("/api/v1/make",RazorPay);
+
+// Cache Monitoring & Control Routes
+app.get("/api/v1/cache/stats", (req, res) => {
+  res.json({
+    message: "Cache statistics",
+    stats: getCacheStats(),
+  });
+});
+
+app.post("/api/v1/cache/flush", (req, res) => {
+  flushAllCache();
+  res.json({ message: "Cache flushed successfully" });
+});
 
 app.get("/", (req, res) => {
   res.send("server is running..");

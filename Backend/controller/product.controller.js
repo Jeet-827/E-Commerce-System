@@ -1,6 +1,6 @@
 import Product from "../model/product.model.js";
 import imagekit from "../config/imagekit.config.js";
-
+import { clearCachePattern } from "../utils/cache.js";
 
 export const GetAllProduct = async (req, res) => {
   try {
@@ -68,6 +68,11 @@ export const CreateProduct = async (req, res) => {
       category,
       description,
     });
+
+    // Invalidate product & category caches so fresh data is served immediately
+    clearCachePattern("/product");
+    clearCachePattern("/categories");
+    clearCachePattern("/search");
 
     res.status(201).json({
       message: "Product Created",
@@ -144,6 +149,12 @@ export const DeleteProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    // Invalidate product caches
+    clearCachePattern("/product");
+    clearCachePattern("/categories");
+    clearCachePattern("/search");
+
     res.status(200).json({
       message: "Product deleted successfully",
       data: product,
