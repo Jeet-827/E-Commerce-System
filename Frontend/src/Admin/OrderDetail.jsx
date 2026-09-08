@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import axios from "axios";
-import { API_BASE_URL } from "../config/api.config.js";
+import { ADMIN_API_BASE_URL, API_BASE_URL } from "../config/api.config.js";
 import Nav from "./Nav";
 
 function OrderDetail() {
@@ -18,9 +18,18 @@ function OrderDetail() {
       const fetchOrderDetail = async () => {
         try {
           setLoading(true);
-          const res = await axios.get(
-            `${API_BASE_URL}/api/v1/order/orderget/${id}`
-          );
+          let res;
+          try {
+            res = await axios.get(
+              `${ADMIN_API_BASE_URL}/api/v1/order/singleorder/${id}`,
+              { withCredentials: true }
+            );
+          } catch {
+            res = await axios.get(
+              `${API_BASE_URL}/api/v1/order/orderget/${id}`,
+              { withCredentials: true }
+            );
+          }
           setOrder(res.data.order || res.data.data);
         } catch (err) {
           console.error("Error fetching order details:", err);
