@@ -1,4 +1,5 @@
 import Order from "../model/order.model.js";
+import { executeInWorkerThread } from "../services/worker.service.js";
 
 export const OrderCreate = async (req, res) => {
   try {
@@ -118,6 +119,29 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({
       message: error.message,
     });
+  }
+};
+
+/**
+ * Calculate Analytics using Worker Thread
+ */
+export const getOrderAnalytics = async (req, res) => {
+  try {
+    const orders = await Order.find({})
+      .populate("productid")
+      .select("productid status payment createdAt")
+      .lean();
+
+    // Offload heavy calculation to Worker Thread (never blocks Express main thread)
+    const analytics = await executeInWorkerThread("CALCULATE_ORDER_ANALYTICS", orders);
+
+    res.status(200).json({
+      message: "Order analytics calculated via Worker Thread",
+      analytics,
+    });
+  } catch (error) {
+    console.error("Worker analytics error:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 

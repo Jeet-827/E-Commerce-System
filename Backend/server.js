@@ -13,6 +13,7 @@ import SearchRoute from "./routes/search.routes.js";
 import RazorPay from "./routes/razor.routes.js";
 import cors from "cors";
 import { getCacheStats, flushAllCache } from "./utils/cache.js";
+import { executeInWorkerThread } from "./services/worker.service.js";
 
 const app = express();
 
@@ -82,6 +83,24 @@ app.get("/api/v1/cache/stats", (req, res) => {
 app.post("/api/v1/cache/flush", (req, res) => {
   flushAllCache();
   res.json({ message: "Cache flushed successfully" });
+});
+
+// Worker Thread Direct Task Execution & Benchmark
+app.post("/api/v1/worker/benchmark", async (req, res) => {
+  try {
+    const iterations = req.body.iterations || 1000000;
+    const startTime = Date.now();
+    const result = await executeInWorkerThread("HEAVY_COMPUTATION", { iterations });
+    const duration = Date.now() - startTime;
+
+    res.json({
+      message: "Heavy computation processed in isolated Worker Thread",
+      durationMs: duration,
+      result,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.get("/", (req, res) => {
