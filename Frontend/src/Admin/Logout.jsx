@@ -39,7 +39,8 @@ const Logout = () => {
     } catch (error) {
       console.error("Admin logout failed:", error);
     } finally {
-      // 2. Always redirect admin to Admin Login page (/admin)
+      // 2. Clear admin session and redirect to Admin Login page (/admin)
+      localStorage.removeItem("adminLoggedIn");
       setLoggingOut(false);
       navigate("/admin", { replace: true });
     }

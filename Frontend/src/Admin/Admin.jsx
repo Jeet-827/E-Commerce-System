@@ -23,6 +23,8 @@ function Admin() {
         { withCredentials: true }
       );
 
+      localStorage.setItem("adminLoggedIn", "true");
+
       setMessage({
         text: res.data.message || "Login successful! Redirecting...",
         type: "success",
