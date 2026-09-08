@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import axios from "axios";
 import { useUser } from "../store/Usercontext.jsx";
+import { API_BASE_URL } from "../config/api.config.js";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { ToastContainer, toast } from "react-toastify";
@@ -59,7 +60,7 @@ function Home() {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await axios.get(
-        "http://localhost:5000/api/v1/product/productget",
+        `${API_BASE_URL}/api/v1/product/productget`,
         { withCredentials: true, headers }
       );
       setProducts(res.data.products || res.data.Products || []);
@@ -91,13 +92,13 @@ function Home() {
           productdescription: product.description,
         };
         await axios.post(
-          "http://localhost:5000/api/v1/cartdata/cartitem",
+          `${API_BASE_URL}/api/v1/cartdata/cartitem`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         toast.success("Item Added", { autoClose: 500 });
         const cartRes = await axios.get(
-          "http://localhost:5000/api/v1/cartdata/cartget",
+          `${API_BASE_URL}/api/v1/cartdata/cartget`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCartitem(cartRes.data.cart || []);

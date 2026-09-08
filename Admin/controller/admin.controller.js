@@ -25,7 +25,12 @@ export const Signin = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     return res.status(201).json({
       message: "Admin Login Succesfully",
@@ -59,7 +64,12 @@ export const Admincreate = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     return res.status(201).json({
       message: "Admin create Succesfuuly",

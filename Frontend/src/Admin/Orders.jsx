@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.config.js";
 import { useNavigate } from "react-router-dom";
 import Nav from "./Nav";
 import { ToastContainer, toast } from "react-toastify";
@@ -15,7 +16,7 @@ const Orders = () => {
     try {
       setLoading(true);
       const res = await axios.get(
-        "http://localhost:5000/api/v1/order/showorder"
+        `${API_BASE_URL}/api/v1/order/showorder`
       );
       setOrders(res.data.orders || res.data.order || res.data.data || []);
     } catch (err) {
@@ -34,7 +35,7 @@ const Orders = () => {
   const handleStatusChange = useCallback(async (orderId, newStatus) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/v1/order/updatestatus/${orderId}`,
+        `${API_BASE_URL}/api/v1/order/updatestatus/${orderId}`,
         { status: newStatus }
       );
       toast.success(`Order status updated to ${newStatus}`);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import { useUser } from "../store/Usercontext.jsx";
+import { API_BASE_URL } from "../config/api.config.js";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { ToastContainer, toast } from "react-toastify";
@@ -36,7 +37,7 @@ const Profile = () => {
     setError("");
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/v1/orderdata/ordersget",
+        `${API_BASE_URL}/api/v1/orderdata/ordersget`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -67,7 +68,7 @@ const Profile = () => {
       setPassLoading(true);
       try {
         await axios.post(
-          "http://localhost:5000/api/v1/userdata/changepassword",
+          `${API_BASE_URL}/api/v1/userdata/changepassword`,
           { oldPassword, newPassword },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -90,7 +91,7 @@ const Profile = () => {
       setEditLoading(true);
       try {
         const response = await axios.put(
-          "http://localhost:5000/api/v1/userdata/updateprofile",
+          `${API_BASE_URL}/api/v1/userdata/updateprofile`,
           { name: editName, email: editEmail },
           { headers: { Authorization: `Bearer ${token}` } }
         );

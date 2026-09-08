@@ -9,9 +9,22 @@ import EditRouter from "./routes/editproduct.routes.js";
 import cors from "cors"
 const app = express();
 DBConnect();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
   }),
 );
@@ -27,6 +40,11 @@ app.get("/", (req, res) => {
   res.send("server running..");
 });
 
-app.listen(process.env.AdminPORT, () => {
-  console.log(`server is running ${process.env.AdminPORT}`);
-});
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  app.listen(process.env.AdminPORT || 8000, () => {
+    console.log(`server is running ${process.env.AdminPORT || 8000}`);
+  });
+}
+
+export default app;
+

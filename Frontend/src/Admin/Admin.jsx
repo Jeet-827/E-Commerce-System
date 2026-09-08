@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import { ADMIN_API_BASE_URL } from "../config/api.config.js";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowLeft, FiShield } from "react-icons/fi";
 function Admin() {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ function Admin() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/v1/admin/adminsignin",
+        `${ADMIN_API_BASE_URL}/api/v1/admin/adminsignin`,
         { email, password },
         { withCredentials: true }
       );

@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../store/Usercontext";
+import { API_BASE_URL } from "../config/api.config.js";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ function Login() {
     try {
       const data = { email, password };
       const res = await axios.post(
-        "http://localhost:5000/api/v1/signin",
+        `${API_BASE_URL}/api/v1/signin`,
         data,
         { withCredentials: true }
       );

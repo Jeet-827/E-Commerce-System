@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.config.js";
 import Nav from "./Nav";
 
 const Customersmanage = () => {
@@ -14,12 +15,12 @@ const Customersmanage = () => {
       // Try primary route
       let res;
       try {
-        res = await axios.get("http://localhost:5000/api/v1/alluser", {
+        res = await axios.get(`${API_BASE_URL}/api/v1/alluser`, {
           withCredentials: true,
         });
       } catch (err1) {
         // Fallback route
-        res = await axios.get("http://localhost:5000/api/v1/user/alluser", {
+        res = await axios.get(`${API_BASE_URL}/api/v1/user/alluser`, {
           withCredentials: true,
         });
       }

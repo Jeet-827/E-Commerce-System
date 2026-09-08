@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.config.js";
 
 const Usercontext = createContext();
 
@@ -14,7 +15,7 @@ export const Providerfun = ({ children }) => {
   const func = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/v1/tokenData/regen",
+        `${API_BASE_URL}/api/v1/tokenData/regen`,
         {},
         { withCredentials: true, timeout: 2500 }
       );

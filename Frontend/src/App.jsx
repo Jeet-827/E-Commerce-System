@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useUser } from "./store/Usercontext";
+import { API_BASE_URL } from "./config/api.config.js";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -51,7 +52,7 @@ function App() {
       if (!user) return;
       try {
         const res = await axios.post(
-          "http://localhost:5000/api/v1/tokenData/token",
+          `${API_BASE_URL}/api/v1/tokenData/token`,
           {},
           { withCredentials: true }
         );
@@ -71,7 +72,7 @@ function App() {
     }
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/v1/cartdata/cartget",
+        `${API_BASE_URL}/api/v1/cartdata/cartget`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCartitem(res.data.cart || res.data.card || []);

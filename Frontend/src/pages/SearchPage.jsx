@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useMemo, memo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useUser } from "../store/Usercontext";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.config.js";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
@@ -97,7 +98,7 @@ function SearchPage() {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:5000/api/v1/search/search?q=${query}`
+        `${API_BASE_URL}/api/v1/search/search?q=${query}`
       );
       setProducts(res.data.products || []);
     } catch (error) {
@@ -133,13 +134,13 @@ function SearchPage() {
           productdescription: elem.description,
         };
         await axios.post(
-          "http://localhost:5000/api/v1/cartdata/cartitem",
+          `${API_BASE_URL}/api/v1/cartdata/cartitem`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert("Item Added to Cart!");
         const cartRes = await axios.get(
-          "http://localhost:5000/api/v1/cartdata/cartget",
+          `${API_BASE_URL}/api/v1/cartdata/cartget`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCartitem(cartRes.data.cart || []);

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "../store/Usercontext.jsx";
+import { API_BASE_URL } from "../config/api.config.js";
 import Footer from "../components/Footer";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -281,7 +282,7 @@ function Landing() {
     setLoadingProducts(true);
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/v1/product/productget?limit=8"
+        `${API_BASE_URL}/api/v1/product/productget?limit=8`
       );
       setProducts(res.data.products || []);
     } catch (err) {
@@ -294,7 +295,7 @@ function Landing() {
   /* Fetch Real Categories from DB */
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/v1/product/categories");
+      const res = await axios.get(`${API_BASE_URL}/api/v1/product/categories`);
       setCategories(res.data.categories || []);
     } catch (err) {
       console.log("Error loading categories:", err);
@@ -341,14 +342,14 @@ function Landing() {
           productdescription: product.description,
         };
         await axios.post(
-          "http://localhost:5000/api/v1/cartdata/cartitem",
+          `${API_BASE_URL}/api/v1/cartdata/cartitem`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         toast.success("Added to Cart! 🛒", { autoClose: 800 });
 
         const cartRes = await axios.get(
-          "http://localhost:5000/api/v1/cartdata/cartget",
+          `${API_BASE_URL}/api/v1/cartdata/cartget`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCartitem(cartRes.data.cart || []);

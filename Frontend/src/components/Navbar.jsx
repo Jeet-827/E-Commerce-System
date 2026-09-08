@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { useUser } from "../store/Usercontext";
+import { API_BASE_URL } from "../config/api.config.js";
 import {
   FaShoppingCart,
   FaSignOutAlt,
@@ -39,7 +40,7 @@ function Navbar() {
       }
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/v1/search/search?q=${searchTerm}`
+          `${API_BASE_URL}/api/v1/search/search?q=${searchTerm}`
         );
         setSearchResults(res.data.products || []);
         setShowDropdown(true);

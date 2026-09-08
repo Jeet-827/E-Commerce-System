@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import Nav from "./Nav";
 import { toast } from "react-toastify";
+import { API_BASE_URL, ADMIN_API_BASE_URL } from "../config/api.config.js";
 
 const Settings = () => {
   const [email, setEmail] = useState("");
@@ -18,19 +19,19 @@ const Settings = () => {
     try {
       let products = [];
       try {
-        // First try Admin server on port 8000 (all products without limit)
-        const res = await axios.get("http://localhost:8000/api/v1/edit/editallproduct");
+        // First try Admin server (all products without limit)
+        const res = await axios.get(`${ADMIN_API_BASE_URL}/api/v1/edit/editallproduct`);
         if (res.data && Array.isArray(res.data.data)) {
           products = res.data.data;
         }
       } catch (err) {
-        console.log("Port 8000 fallback to 5000", err?.message);
+        console.log("Admin fallback to backend API", err?.message);
       }
 
-      // If port 8000 didn't return products, fallback to backend port 5000 with limit=0
+      // Fallback to backend API with limit=0
       if (!products || products.length === 0) {
         const res = await axios.get(
-          "http://localhost:5000/api/v1/product/productget?limit=0"
+          `${API_BASE_URL}/api/v1/product/productget?limit=0`
         );
         products = res.data.products || res.data.data || [];
       }
@@ -47,9 +48,9 @@ const Settings = () => {
     setDeletingId(id);
     try {
       try {
-        await axios.delete(`http://localhost:8000/api/v1/edit/deleteproduct/${id}`);
+        await axios.delete(`${ADMIN_API_BASE_URL}/api/v1/edit/deleteproduct/${id}`);
       } catch {
-        await axios.delete(`http://localhost:5000/api/v1/product/deleteproduct/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/v1/product/deleteproduct/${id}`);
       }
 
       // Remove from list immediately in state
@@ -68,7 +69,7 @@ const Settings = () => {
     try {
       // Try Admin update pass endpoint first
       const res = await axios.post(
-        "http://localhost:8000/api/v1/admin/updatepass",
+        `${ADMIN_API_BASE_URL}/api/v1/admin/updatepass`,
         { email, password, newpassword },
         { withCredentials: true }
       );
@@ -80,7 +81,7 @@ const Settings = () => {
       // Fallback to store user changepassword if admin port differs
       try {
         const res = await axios.post(
-          "http://localhost:5000/api/v1/userdata/changepassword",
+          `${API_BASE_URL}/api/v1/userdata/changepassword`,
           { email, password, newpassword }
         );
         toast.success(res.data.message || "Password updated successfully!");

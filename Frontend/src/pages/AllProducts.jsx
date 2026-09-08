@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { useUser } from "../store/Usercontext";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.config.js";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
@@ -157,7 +158,7 @@ function Allproducts() {
       else setPageLoading(true);
 
       const res = await axios.get(
-        `http://localhost:5000/api/v1/product/productget?page=${page}&limit=${ITEMS_PER_PAGE}&category=${category}&search=${search}`
+        `${API_BASE_URL}/api/v1/product/productget?page=${page}&limit=${ITEMS_PER_PAGE}&category=${category}&search=${search}`
       );
 
       setProduct(res.data.products || []);
@@ -221,13 +222,13 @@ function Allproducts() {
           productdescription: elem.description,
         };
         await axios.post(
-          "http://localhost:5000/api/v1/cartdata/cartitem",
+          `${API_BASE_URL}/api/v1/cartdata/cartitem`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         alert("Added to Cart!");
         const cartRes = await axios.get(
-          "http://localhost:5000/api/v1/cartdata/cartget",
+          `${API_BASE_URL}/api/v1/cartdata/cartget`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCartitem(cartRes.data.cart || cartRes.data.card || []);

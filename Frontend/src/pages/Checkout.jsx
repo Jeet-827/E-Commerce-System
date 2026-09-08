@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import axios from "axios";
 import { useUser } from "../store/Usercontext";
+import { API_BASE_URL } from "../config/api.config.js";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/Navbar";
@@ -49,7 +50,7 @@ function Checkout() {
       if (token && !directBuyItem) {
         try {
           const res = await axios.get(
-            "http://localhost:5000/api/v1/cartdata/cartget",
+            `${API_BASE_URL}/api/v1/cartdata/cartget`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const cartList = res.data.cart || res.data.card || [];
@@ -101,7 +102,7 @@ function Checkout() {
   const saveOrder = async (paymentStatus) => {
     const productIds = checkoutItems.map((item) => item.productid || item._id);
     await axios.post(
-      "http://localhost:5000/api/v1/order/ordercreate",
+      `${API_BASE_URL}/api/v1/order/ordercreate`,
       {
         userid: user?._id,
         productid: productIds,
@@ -157,7 +158,7 @@ function Checkout() {
       if (!ok) { toast.error("Razorpay failed to load."); setLoading(false); return; }
 
       const { data } = await axios.post(
-        "http://localhost:5000/api/v1/make/payment",
+        `${API_BASE_URL}/api/v1/make/payment`,
         { amount: orderTotal },
         { headers: { Authorization: `Bearer ${token}` } }
       );

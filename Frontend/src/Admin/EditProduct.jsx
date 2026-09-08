@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { API_BASE_URL, ADMIN_API_BASE_URL } from "../config/api.config.js";
 
 function EditProduct() {
     const { id } = useParams();
@@ -15,7 +16,7 @@ function EditProduct() {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const res = await axios.get("http://localhost:8000/api/v1/edit/editallproduct");
+                const res = await axios.get(`${ADMIN_API_BASE_URL}/api/v1/edit/editallproduct`);
                 const product = res.data.data.find(p => p._id === id);
                 if (product) {
                     setProductimage(product.productimage?.[0] || "");
@@ -35,7 +36,7 @@ function EditProduct() {
         e.preventDefault();
         try {
             await axios.put(
-                `http://localhost:8000/api/v1/edit/updateproduct/${id}`,
+                `${ADMIN_API_BASE_URL}/api/v1/edit/updateproduct/${id}`,
                 { productimage: [productimage], title, price, category, description },
                 { withCredentials: true }
             );
@@ -50,9 +51,9 @@ function EditProduct() {
     const deleteProduct = async () => {
         try {
             try {
-                await axios.delete(`http://localhost:8000/api/v1/edit/deleteproduct/${id}`);
+                await axios.delete(`${ADMIN_API_BASE_URL}/api/v1/edit/deleteproduct/${id}`);
             } catch {
-                await axios.delete(`http://localhost:5000/api/v1/product/deleteproduct/${id}`);
+                await axios.delete(`${API_BASE_URL}/api/v1/product/deleteproduct/${id}`);
             }
             toast.success("Product deleted successfully!");
             navigate("/settings");

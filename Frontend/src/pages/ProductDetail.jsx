@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "../store/Usercontext.jsx";
+import { API_BASE_URL } from "../config/api.config.js";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { ToastContainer, toast } from "react-toastify";
@@ -54,7 +55,7 @@ function ProductDetail() {
     try {
       // Try single product API
       const res = await axios.get(
-        `http://localhost:5000/api/v1/product/productget/${id}`
+        `${API_BASE_URL}/api/v1/product/productget/${id}`
       );
       if (res.data.product) {
         setProduct(res.data.product);
@@ -64,7 +65,7 @@ function ProductDetail() {
       // Fallback: fetch all and find matching ID
       try {
         const fallbackRes = await axios.get(
-          "http://localhost:5000/api/v1/product/productget?limit=100"
+          `${API_BASE_URL}/api/v1/product/productget?limit=100`
         );
         const allList = fallbackRes.data.products || [];
         const found = allList.find((p) => p._id === id);
@@ -85,7 +86,7 @@ function ProductDetail() {
   const fetchRelated = useCallback(async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/v1/product/productget?limit=6"
+        `${API_BASE_URL}/api/v1/product/productget?limit=6`
       );
       const all = res.data.products || [];
       setRelatedProducts(all.filter((p) => p._id !== id));
@@ -122,7 +123,7 @@ function ProductDetail() {
       };
 
       await axios.post(
-        "http://localhost:5000/api/v1/cartdata/cartitem",
+        `${API_BASE_URL}/api/v1/cartdata/cartitem`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -131,7 +132,7 @@ function ProductDetail() {
 
       // Refresh cart
       const cartRes = await axios.get(
-        "http://localhost:5000/api/v1/cartdata/cartget",
+        `${API_BASE_URL}/api/v1/cartdata/cartget`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCartitem(cartRes.data.cart || cartRes.data.card || []);

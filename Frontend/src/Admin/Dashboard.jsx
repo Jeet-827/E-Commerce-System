@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useUser } from "../store/Usercontext";
+import { API_BASE_URL } from "../config/api.config.js";
 import Nav from "./Nav";
 import { toast } from "react-toastify";
 
@@ -41,7 +42,7 @@ function Dashboard() {
       formData.append("file", file);
 
       const res = await axios.post(
-        "http://localhost:5000/api/v1/productgenereted/createproduct",
+        `${API_BASE_URL}/api/v1/productgenereted/createproduct`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } },
       );

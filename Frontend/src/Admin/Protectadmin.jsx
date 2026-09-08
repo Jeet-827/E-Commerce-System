@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { ADMIN_API_BASE_URL } from "../config/api.config.js";
 import { Navigate, Outlet } from "react-router-dom";
 
 const Protectadmin = () => {
@@ -10,7 +11,7 @@ const Protectadmin = () => {
     const checkAdmin = async () => {
       try {
         const res = await axios.post(
-          "http://localhost:8000/api/v1/admin/protected",
+          `${ADMIN_API_BASE_URL}/api/v1/admin/protected`,
           {},
           { withCredentials: true }
         );

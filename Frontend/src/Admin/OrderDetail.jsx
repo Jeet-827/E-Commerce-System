@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.config.js";
 import Nav from "./Nav";
 
 function OrderDetail() {
@@ -18,7 +19,7 @@ function OrderDetail() {
         try {
           setLoading(true);
           const res = await axios.get(
-            `http://localhost:5000/api/v1/order/orderget/${id}`
+            `${API_BASE_URL}/api/v1/order/orderget/${id}`
           );
           setOrder(res.data.order || res.data.data);
         } catch (err) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { ADMIN_API_BASE_URL } from '../config/api.config.js';
 import Nav from './Nav';
 
 const Logout = () => {
@@ -12,7 +13,7 @@ const Logout = () => {
     const fetchAdminDetails = async () => {
       try {
         const res = await axios.post(
-          "http://localhost:8000/api/v1/admin/protected",
+          `${ADMIN_API_BASE_URL}/api/v1/admin/protected`,
           {},
           { withCredentials: true }
         );
@@ -31,7 +32,7 @@ const Logout = () => {
     try {
       // 1. Call backend logout API to clear admin session cookie
       await axios.post(
-        "http://localhost:8000/api/v1/admin/adminlogout",
+        `${ADMIN_API_BASE_URL}/api/v1/admin/adminlogout`,
         {},
         { withCredentials: true }
       );

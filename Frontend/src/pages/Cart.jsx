@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import { useUser } from "../store/Usercontext";
+import { API_BASE_URL } from "../config/api.config.js";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/Navbar";
@@ -14,7 +15,7 @@ function Cart() {
   const CartApi = useCallback(async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/api/v1/cartdata/getcart",
+        `${API_BASE_URL}/api/v1/cartdata/getcart`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCartitem(res.data.card || []);
@@ -31,7 +32,7 @@ function Cart() {
     async (itemId) => {
       try {
         const res = await axios.delete(
-          `http://localhost:5000/api/v1/cartdata/cartitem/${itemId}`,
+          `${API_BASE_URL}/api/v1/cartdata/cartitem/${itemId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCartitem(res.data.card || []);
