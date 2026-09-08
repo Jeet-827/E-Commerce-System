@@ -11,6 +11,9 @@ import TokenModel from "./routes/token.routes.js";
 import OrderRoute from "./routes/order.routes.js";
 import SearchRoute from "./routes/search.routes.js";
 import RazorPay from "./routes/razor.routes.js";
+import AdminRoutes from "./routes/admin.routes.js";
+import EditRouter from "./routes/editproduct.routes.js";
+import Alluser from "./routes/alluserget.routes.js";
 import cors from "cors";
 import { getCacheStats, flushAllCache } from "./utils/cache.js";
 import { executeInWorkerThread } from "./services/worker.service.js";
@@ -21,7 +24,7 @@ const app = express();
 app.use(
   compression({
     level: 6,
-    threshold: 1024, // only compress responses larger than 1KB
+    threshold: 1024,
     filter: (req, res) => {
       if (req.headers["x-no-compression"]) return false;
       return compression.filter(req, res);
@@ -29,21 +32,11 @@ app.use(
   })
 );
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:3000",
-  process.env.FRONTEND_URL,
-].filter(Boolean);
-
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
-        callback(null, true);
-      } else {
-        callback(null, true);
-      }
+      // Return exact origin to satisfy Access-Control-Allow-Credentials: true
+      callback(null, origin || true);
     },
     credentials: true,
   }),
@@ -70,7 +63,11 @@ app.use("/api/v1/order", OrderRoute);
 app.use("/api/v1/ordergenereted", OrderRoute);
 app.use("/api/v1/orderdata", OrderRoute);
 app.use("/api/v1/search", SearchRoute);
-app.use("/api/v1/make",RazorPay);
+app.use("/api/v1/make", RazorPay);
+app.use("/api/v1/admin", AdminRoutes);
+app.use("/api/v1/edit", EditRouter);
+app.use("/api/v1/user", Alluser);
+app.use("/api/v1/alluser", Alluser);
 
 // Cache Monitoring & Control Routes
 app.get("/api/v1/cache/stats", (req, res) => {
