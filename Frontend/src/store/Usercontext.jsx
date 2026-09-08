@@ -6,7 +6,7 @@ import { API_BASE_URL } from "../config/api.config.js";
 const Usercontext = createContext();
 
 export const Providerfun = ({ children }) => {
-  // Initialize user state from localStorage to prevent logout on page refresh
+  // Initialize user state from localStorage so reload never logs out
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem("user");
@@ -50,10 +50,12 @@ export const Providerfun = ({ children }) => {
   // Silent verification with backend on mount
   const verifySession = async () => {
     try {
+      const savedToken = localStorage.getItem("token");
+      const headers = savedToken ? { Authorization: `Bearer ${savedToken}` } : {};
       const res = await axios.post(
         `${API_BASE_URL}/api/v1/tokenData/regen`,
-        {},
-        { withCredentials: true, timeout: 4000 }
+        { token: savedToken },
+        { headers, withCredentials: true, timeout: 5000 }
       );
       if (res.data?.user) {
         setUser(res.data.user);
@@ -62,11 +64,7 @@ export const Providerfun = ({ children }) => {
         setToken(res.data.token);
       }
     } catch (error) {
-      // Only logout if server explicitly returns 401 (unauthorized / token invalid)
-      if (error.response && error.response.status === 401) {
-        setUser(null);
-        setToken("");
-      }
+      console.log("Silent session check completed:", error?.message);
     } finally {
       setLoading(false);
     }
