@@ -8,6 +8,7 @@
     "start": "node server.js",
     "cluster": "node cluster.js",
     "start:cluster": "node cluster.js",
+    "migrate:db": "node scripts/migrate_db.js",
     "dev": "npx nodemon server.js"
   },
   "keywords": [],
