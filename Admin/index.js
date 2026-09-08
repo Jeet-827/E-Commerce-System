@@ -1,14 +1,24 @@
 import "dotenv/config";
-import express, { json } from "express";
+import express from "express";
 import DBConnect from "./config/db.config.js";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 import Showorder from './routes/order.routes.js'
 import AdminRoutes from "./routes/admin.routes.js";
 import Alluser from "./routes/alluserget.routes.js"
 import EditRouter from "./routes/editproduct.routes.js";
 import cors from "cors"
+
 const app = express();
 DBConnect();
+
+app.use(
+  compression({
+    level: 6,
+    threshold: 1024,
+  })
+);
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -29,8 +39,8 @@ app.use(
   }),
 );
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/api/v1/admin", AdminRoutes);
 app.use("/api/v1/order", Showorder);
 app.use("/api/v1/user",Alluser)

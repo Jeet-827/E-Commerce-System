@@ -1,6 +1,7 @@
 import "./config/env.config.js";
 import express from "express";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 import DBConnect from "./config/db.config.js";
 import router from "./routes/user.routes.js";
 import ProductRoute from "./routes/product.routes.js";
@@ -13,6 +14,19 @@ import RazorPay from "./routes/razor.routes.js";
 import cors from "cors";
 
 const app = express();
+
+// High Performance HTTP Compression (gzip / deflate)
+app.use(
+  compression({
+    level: 6,
+    threshold: 1024, // only compress responses larger than 1KB
+    filter: (req, res) => {
+      if (req.headers["x-no-compression"]) return false;
+      return compression.filter(req, res);
+    },
+  })
+);
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -32,8 +46,8 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
 // Cache-Control for product GET APIs (Instant load & background revalidation)

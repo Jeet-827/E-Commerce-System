@@ -1,5 +1,6 @@
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
+
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api.config.js";
 
@@ -74,20 +75,23 @@ export const Providerfun = ({ children }) => {
     verifySession();
   }, []);
 
+  const contextValue = useMemo(
+    () => ({
+      user,
+      setUser,
+      loading,
+      cartitem,
+      setCartitem,
+      token,
+      setToken,
+      editproduct,
+      setEditproduct,
+    }),
+    [user, loading, cartitem, token, editproduct]
+  );
+
   return (
-    <Usercontext.Provider
-      value={{
-        user,
-        setUser,
-        loading,
-        cartitem,
-        setCartitem,
-        token,
-        setToken,
-        editproduct,
-        setEditproduct,
-      }}
-    >
+    <Usercontext.Provider value={contextValue}>
       {children}
     </Usercontext.Provider>
   );

@@ -1,10 +1,19 @@
 import mongoose from "mongoose";
+
 const DBConnect = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log("Mongodb Connected");
+    const options = {
+      maxPoolSize: 50,
+      minPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4,
+    };
+
+    await mongoose.connect(process.env.MONGO_URL, options);
+    console.log("✅ Admin MongoDB Connected with optimized connection pool");
   } catch (error) {
-    console.log(error);
+    console.error("❌ Admin MongoDB Connection Error:", error);
   }
 };
 
