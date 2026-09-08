@@ -1,27 +1,17 @@
-import jwt from "jsonwebtoken"
-import User from "../model/user.model.js"
-export const Auth2Middleware= async(req,res,next)=>{
-     try
-     {
-            const Token=req.cookies.token
-            const decode = jwt.verify(Token,process.env.SECRET_TWO)
-            if(!decode){
-                return res.status(404).json({message:"the user is not valid"})
-            }
-            const id = decode.id
-            const user = await User.findById(id)
-            if (!user) {
-                return res.status(404).json({message:"User not found"})
-            }
-            req.UserId = id
-            req.user = user
-          
-            next()
-     }
+import jwt from "jsonwebtoken";
 
-     catch(error)
-     {
-        res.status(401).json({message:"Unauthorized"})
+export const Auth2Middleware = (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+     
+      return res.status(200).json({ user: null, token: null });
+    }
 
-     }
-}
+    const decoded = jwt.verify(token, process.env.SECRET_TWO);
+    req.UserId = decoded.id;
+    next();
+  } catch {
+    return res.status(200).json({ user: null, token: null });
+  }
+};

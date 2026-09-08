@@ -1,66 +1,37 @@
 import User from "../model/user.model.js";
+
 export const CartAdd = async (req, res) => {
   try {
-    const {
-      itemimage,
-      productid,
-      producttitle,
-      productprice,
-      productdescription,
-      quantity,
-    } = req.body;
-
+    const { itemimage, productid, producttitle, productprice, productdescription, quantity } = req.body;
     const userId = req.UserId;
-    const Cart = await User.findByIdAndUpdate(
+
+    const user = await User.findByIdAndUpdate(
       userId,
       {
         $push: {
-          cartitem: {
-            itemimage,
-            productid,
-            producttitle,
-            productprice,
-            productdescription,
-            quantity: quantity || 1,
-          },
+          cartitem: { itemimage, productid, producttitle, productprice, productdescription, quantity: quantity || 1 },
         },
       },
-      { returnDocument: 'after', runValidators: true },
+      { new: true, runValidators: true }
     );
 
-    if (!Cart) {
-      return res.status(404).json({
-        message: "User Not Found",
-      });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    return res.status(201).json({
-      message: "Product Added Successfully",
-      Cart,
-    });
+    return res.status(201).json({ message: "Product added to cart", cart: user.cartitem });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("CartAdd:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };
 
 export const CartData = async (req, res) => {
   try {
-    const UserId = req.UserId
-    const Data = await User.findById(UserId).lean();
-    const cartList = Data?.cartitem || [];
-    res.status(200).json({
-      message: "All Product Found",
-      cart: cartList,
-      card: cartList,
-    });
+    const data = await User.findById(req.UserId).select("cartitem").lean();
+    const cart = data?.cartitem || [];
+    res.status(200).json({ message: "Cart fetched", cart });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("CartData:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -68,28 +39,18 @@ export const CartRemove = async (req, res) => {
   try {
     const userId = req.UserId;
     const itemId = req.params.id;
-    const Cart = await User.findByIdAndUpdate(
+
+    const user = await User.findByIdAndUpdate(
       userId,
-      {
-        $pull: {
-          cartitem: { _id: itemId },
-        },
-      },
-      { returnDocument: 'after' }
+      { $pull: { cartitem: { _id: itemId } } },
+      { new: true }
     );
-    if (!Cart) {
-      return res.status(404).json({
-        message: "User Not Found",
-      });
-    }
-    return res.status(200).json({
-      message: "Product Removed Successfully",
-      card: Cart.cartitem,
-    });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({ message: "Product removed from cart", cart: user.cartitem });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("CartRemove:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };

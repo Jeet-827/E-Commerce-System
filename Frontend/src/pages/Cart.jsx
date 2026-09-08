@@ -15,12 +15,12 @@ function Cart() {
   const CartApi = useCallback(async () => {
     try {
       const res = await axios.get(
-        `${API_BASE_URL}/api/v1/cartdata/getcart`,
+        `${API_BASE_URL}/api/v1/cartdata/cartget`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setCartitem(res.data.card || []);
-    } catch (error) {
-      console.log("Error fetching cart data:", error);
+      setCartitem(res.data.cart || []);
+    } catch {
+      // silent
     }
   }, [token, setCartitem]);
 
@@ -35,10 +35,9 @@ function Cart() {
           `${API_BASE_URL}/api/v1/cartdata/cartitem/${itemId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setCartitem(res.data.card || []);
+        setCartitem(res.data.cart || []);
         toast.success("Item removed from cart!", { autoClose: 500 });
-      } catch (error) {
-        console.log("Error removing item:", error);
+      } catch {
         toast.error("Failed to remove item.");
       }
     },

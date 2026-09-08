@@ -55,8 +55,8 @@ function Checkout() {
           );
           const cartList = res.data.cart || res.data.card || [];
           setCartitem(cartList);
-        } catch (err) {
-          console.log("Error syncing cart in checkout:", err);
+        } catch {
+          // silent — cart sync failure is non-critical
         }
       }
     };
@@ -67,6 +67,34 @@ function Checkout() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   }, []);
+
+  /* Validate all address fields before placing any order */
+  const validateAddress = () => {
+    const required = [
+      { key: "houseNo",     label: "House No / Flat" },
+      { key: "street",      label: "Street / Area" },
+      { key: "city",        label: "City" },
+      { key: "state",       label: "State" },
+      { key: "country",     label: "Country" },
+      { key: "pincode",     label: "Pincode" },
+      { key: "phonenumber", label: "Phone Number" },
+    ];
+    for (const { key, label } of required) {
+      if (!formData[key] || !String(formData[key]).trim()) {
+        toast.error(`⚠️ ${label} is required.`);
+        return false;
+      }
+    }
+    if (String(formData.pincode).length !== 6) {
+      toast.error("⚠️ Pincode must be exactly 6 digits.");
+      return false;
+    }
+    if (String(formData.phonenumber).length < 10) {
+      toast.error("⚠️ Phone number must be at least 10 digits.");
+      return false;
+    }
+    return true;
+  };
 
   /* Active checkout items (direct buy item OR full cart) */
   const checkoutItems = useMemo(() => {
@@ -129,14 +157,14 @@ function Checkout() {
         toast.error("Your cart is empty! Please add products to cart first.");
         return;
       }
+      if (!validateAddress()) return;
       setLoading(true);
       try {
         await saveOrder("unpaid");
         toast.success("🎉 Order Placed Successfully!");
         if (!directBuyItem) setCartitem([]);
         setTimeout(() => navigate("/home"), 2000);
-      } catch (error) {
-        console.log(error);
+      } catch {
         toast.error("Failed to place order. Please try again.");
       } finally {
         setLoading(false);
@@ -152,6 +180,7 @@ function Checkout() {
       toast.error("Your cart is empty!");
       return;
     }
+    if (!validateAddress()) return;
     setLoading(true);
     try {
       const ok = await loadRazorpay();
@@ -213,8 +242,7 @@ function Checkout() {
       const rzp = new window.Razorpay(options);
       rzp.on("payment.failed", (r) => { toast.error(r.error.description); setLoading(false); });
       rzp.open();
-    } catch (err) {
-      console.log(err);
+    } catch {
       toast.error("Could not initiate payment.");
       setLoading(false);
     }

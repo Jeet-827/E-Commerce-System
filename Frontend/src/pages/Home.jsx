@@ -20,17 +20,39 @@ const HomeProductCard = memo(({ product, onAddToCart, onProductClick }) => {
       onClick={() => onProductClick(product._id)}
     >
       <div className="home-card-img-wrap">
-        <img
-          src={imgSrc}
-          alt={product.title}
-          className="home-card-img"
-          loading="lazy"
-        />
-        <div className="home-card-category">{product.category}</div>
+        {imgSrc ? (
+          <img
+            src={imgSrc}
+            alt={product.title}
+            className="home-card-img"
+            loading="lazy"
+            onError={(e) => {
+              e.target.style.display = "none";
+              if (e.target.nextSibling) {
+                e.target.nextSibling.style.display = "flex";
+              }
+            }}
+          />
+        ) : null}
+        <div
+          className="home-card-fallback-icon"
+          style={{ display: imgSrc ? "none" : "flex" }}
+        >
+          📦
+        </div>
+        {product.category && (
+          <div className="home-card-category">{product.category}</div>
+        )}
       </div>
       <div className="home-card-body">
-        <h2 className="home-card-title">{product.title}</h2>
-        <p className="home-card-desc">{product.description}</p>
+        <div className="home-card-info">
+          <h2 className="home-card-title" title={product.title}>
+            {product.title}
+          </h2>
+          <p className="home-card-desc" title={product.description}>
+            {product.description}
+          </p>
+        </div>
         <div className="home-card-footer">
           <span className="home-card-price">₹{product.price}</span>
           <button

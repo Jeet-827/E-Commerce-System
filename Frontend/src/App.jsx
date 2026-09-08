@@ -21,15 +21,15 @@ const ProtectRoute = lazy(() => import("./ProtectRoute"));
 const Protectadmin = lazy(() => import("./Admin/Protectadmin"));
 
 /* ── Admin pages (lazy) ── */
-const Dashboard        = lazy(() => import("./Admin/Dashboard"));
-const Orders           = lazy(() => import("./Admin/Orders"));
-const OrderDetail      = lazy(() => import("./Admin/OrderDetail"));
-const Admin            = lazy(() => import("./Admin/Admin"));
-const Manageorder      = lazy(() => import("./Admin/Manageproduct"));
-const Customersmanage  = lazy(() => import("./Admin/Customersmanage"));
-const Settings         = lazy(() => import("./Admin/Settings"));
-const Logout           = lazy(() => import("./Admin/Logout"));
-const EditProduct      = lazy(() => import("./Admin/EditProduct"));
+const Dashboard       = lazy(() => import("./Admin/Dashboard"));
+const Orders          = lazy(() => import("./Admin/Orders"));
+const OrderDetail     = lazy(() => import("./Admin/OrderDetail"));
+const Admin           = lazy(() => import("./Admin/Admin"));
+const Manageorder     = lazy(() => import("./Admin/Manageproduct"));
+const Customersmanage = lazy(() => import("./Admin/Customersmanage"));
+const Settings        = lazy(() => import("./Admin/Settings"));
+const Logout          = lazy(() => import("./Admin/Logout"));
+const EditProduct     = lazy(() => import("./Admin/EditProduct"));
 
 /* ── Full-screen suspense fallback ── */
 function PageLoader() {
@@ -44,12 +44,12 @@ function PageLoader() {
 }
 
 function App() {
-  const { user, loading, token, setToken, setCartitem } = useUser();
+  const { user, token, setToken, setCartitem } = useUser();
 
   /* Silently refresh access token every 14 min */
   useEffect(() => {
+    if (!user) return;
     const interval = setInterval(async () => {
-      if (!user) return;
       try {
         const res = await axios.post(
           `${API_BASE_URL}/api/v1/tokenData/token`,
@@ -57,66 +57,59 @@ function App() {
           { withCredentials: true }
         );
         setToken(res.data.accessToken);
-      } catch (error) {
-        console.log("Token refresh failed:", error);
+      } catch {
+        // Token refresh failed silently — user will be prompted on next protected action
       }
     }, 14 * 60 * 1000);
     return () => clearInterval(interval);
   }, [user, setToken]);
 
   /* Fetch cart on mount / login */
-  const fetchCartLocally = useCallback(async () => {
-    if (!token || !user) {
-      setCartitem([]);
-      return;
-    }
+  const fetchCart = useCallback(async () => {
+    if (!token || !user) { setCartitem([]); return; }
     try {
       const res = await axios.get(
         `${API_BASE_URL}/api/v1/cartdata/cartget`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setCartitem(res.data.cart || res.data.card || []);
-    } catch (error) {
-      console.log("Error fetching cart on reload:", error);
+      setCartitem(res.data.cart || []);
+    } catch {
+      // Cart fetch failed silently
     }
   }, [token, user, setCartitem]);
 
-  useEffect(() => {
-    fetchCartLocally();
-  }, [fetchCartLocally]);
+  useEffect(() => { fetchCart(); }, [fetchCart]);
 
   return (
     <Suspense fallback={<PageLoader />}>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} theme="colored" />
       <Routes>
-        {/* Landing page — root */}
         <Route path="/" element={<Landing />} />
         <Route path="/home" element={<Home />} />
-
-        <Route path="/login"    element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/admin"    element={<Admin />} />
-        <Route path="/search"   element={<SearchPage />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/allproducts" element={<Allproducts />} />
 
         {/* Protected Admin routes */}
         <Route element={<Protectadmin />}>
-          <Route path="/dashboard"        element={<Dashboard />} />
-          <Route path="/order"            element={<Orders />} />
-          <Route path="/order/:id"        element={<OrderDetail />} />
-          <Route path="/allproduct"       element={<Manageorder />} />
-          <Route path="/customersmanage"  element={<Customersmanage />} />
-          <Route path="/settings"         element={<Settings />} />
-          <Route path="/logout"           element={<Logout />} />
-          <Route path="/editproduct/:id"  element={<EditProduct />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/order" element={<Orders />} />
+          <Route path="/order/:id" element={<OrderDetail />} />
+          <Route path="/allproduct" element={<Manageorder />} />
+          <Route path="/customersmanage" element={<Customersmanage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/logout" element={<Logout />} />
+          <Route path="/editproduct/:id" element={<EditProduct />} />
         </Route>
 
         {/* Protected user routes */}
         <Route element={<ProtectRoute />}>
-          <Route path="/cart"     element={<Cart />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/profile"  element={<Profile />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
     </Suspense>

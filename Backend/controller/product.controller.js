@@ -1,6 +1,18 @@
 import Product from "../model/product.model.js";
 import imagekit from "../config/imagekit.config.js";
 
+// Simple in-memory cache (TTL: 60 seconds)
+const cache = new Map();
+const CACHE_TTL = 60 * 1000;
+
+const getCache = (key) => {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL) { cache.delete(key); return null; }
+  return entry.data;
+};
+const setCache = (key, data) => cache.set(key, { data, ts: Date.now() });
+const invalidateCache = () => cache.clear();
 
 export const GetAllProduct = async (req, res) => {
   try {
@@ -11,34 +23,30 @@ export const GetAllProduct = async (req, res) => {
     const search = req.query.search;
     const skip = isAll ? 0 : (page - 1) * limit;
 
-    let filterQuery = {};
+    const cacheKey = `products:${category || ""}:${search || ""}:${page}:${limit}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.status(200).json(cached);
 
+    let filterQuery = {};
     if (category && category.toLowerCase() !== "all") {
       filterQuery.category = { $regex: new RegExp(`^${category}$`, "i") };
     }
-
     if (search && search.trim() !== "") {
       filterQuery.title = { $regex: search.trim(), $options: "i" };
     }
 
-    const totalProducts = await Product.countDocuments(filterQuery);
+    const [totalProducts, products] = await Promise.all([
+      Product.countDocuments(filterQuery),
+      Product.find(filterQuery).sort({ _id: -1 }).skip(skip).limit(limit).lean(),
+    ]);
+
     const totalPages = isAll ? 1 : (Math.ceil(totalProducts / (limit || 1)) || 1);
+    const result = { message: "Products fetched", products, totalProducts, totalPages, currentPage: page };
+    setCache(cacheKey, result);
 
-    const products = await Product.find(filterQuery)
-      .sort({ _id: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    res.status(200).json({
-      message: "All Product Find",
-      products,
-      totalProducts,
-      totalPages,
-      currentPage: page,
-    });
+    res.status(200).json(result);
   } catch (error) {
-    console.log(error);
+    console.error("GetAllProduct:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -46,19 +54,16 @@ export const GetAllProduct = async (req, res) => {
 export const CreateProduct = async (req, res) => {
   try {
     const { title, price, category, description } = req.body;
-
     const image = req.file;
 
     if (!image) {
-      return res.status(400).json({
-        message: "Image is required",
-      });
+      return res.status(400).json({ message: "Image is required" });
     }
 
     const uploadimage = await imagekit.upload({
       file: image.buffer,
       fileName: image.originalname,
-      folder:'products'
+      folder: "products",
     });
 
     const ProductData = await Product.create({
@@ -69,38 +74,41 @@ export const CreateProduct = async (req, res) => {
       description,
     });
 
-    res.status(201).json({
-      message: "Product Created",
-      ProductData,
-    });
+    invalidateCache();
+
+    res.status(201).json({ message: "Product Created", ProductData });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("CreateProduct:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };
 
 export const GetProductById = async (req, res) => {
   try {
     const { id } = req.params;
+    const cacheKey = `product:${id}`;
+    const cached = getCache(cacheKey);
+    if (cached) return res.status(200).json(cached);
+
     const product = await Product.findById(id).lean();
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.status(200).json({
-      message: "Product fetched successfully",
-      product,
-    });
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const result = { message: "Product fetched successfully", product };
+    setCache(cacheKey, result);
+    res.status(200).json(result);
   } catch (error) {
-    console.log(error);
+    console.error("GetProductById:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
 
 export const GetCategories = async (req, res) => {
   try {
-    const categories = await Product.aggregate([
+    const cacheKey = "categories";
+    const cached = getCache(cacheKey);
+    if (cached) return res.status(200).json(cached);
+
+    const rawCategories = await Product.aggregate([
       {
         $group: {
           _id: "$category",
@@ -115,9 +123,9 @@ export const GetCategories = async (req, res) => {
       { $sort: { count: -1 } },
     ]);
 
-    res.status(200).json({
+    const result = {
       message: "Categories fetched",
-      categories: categories.map((c) => ({
+      categories: rawCategories.map((c) => ({
         name: c._id,
         count: c.count,
         image: c.sampleImage,
@@ -130,9 +138,11 @@ export const GetCategories = async (req, res) => {
           productimage: c.sampleImage,
         },
       })),
-    });
+    };
+    setCache(cacheKey, result);
+    res.status(200).json(result);
   } catch (error) {
-    console.log(error);
+    console.error("GetCategories:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -141,15 +151,12 @@ export const DeleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Product.findByIdAndDelete(id);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.status(200).json({
-      message: "Product deleted successfully",
-      data: product,
-    });
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    invalidateCache();
+    res.status(200).json({ message: "Product deleted successfully", data: product });
   } catch (error) {
-    console.log(error);
+    console.error("DeleteProduct:", error.message);
     res.status(500).json({ message: error.message });
   }
 };

@@ -41,10 +41,10 @@ const ProductCard = memo(({ elem, onAddToCart, onProductClick }) => {
   return (
     <div
       onClick={() => onProductClick(elem._id)}
-      className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:-translate-y-1.5 hover:shadow-xl hover:border-indigo-300 transition-all duration-300 flex flex-col justify-between cursor-pointer"
+      className="group bg-white border border-slate-200 rounded-xl sm:rounded-2xl overflow-hidden hover:-translate-y-1.5 hover:shadow-xl hover:border-indigo-300 transition-all duration-300 flex flex-col justify-between cursor-pointer h-full"
     >
       {/* Image */}
-      <div className="relative w-full h-52 bg-slate-100 overflow-hidden">
+      <div className="relative w-full h-36 sm:h-52 bg-slate-100 overflow-hidden flex-shrink-0">
         {imgSrc ? (
           <img
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -53,33 +53,43 @@ const ProductCard = memo(({ elem, onAddToCart, onProductClick }) => {
             loading="lazy"
             onError={(e) => {
               e.target.style.display = "none";
-              e.target.nextSibling.style.display = "flex";
+              if (e.target.nextSibling) {
+                e.target.nextSibling.style.display = "flex";
+              }
             }}
           />
         ) : null}
         <div
-          className="w-full h-full flex items-center justify-center text-5xl bg-slate-100"
+          className="w-full h-full flex items-center justify-center text-3xl sm:text-5xl bg-slate-100"
           style={{ display: imgSrc ? "none" : "flex" }}
         >
           {icon}
         </div>
-        <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/90 backdrop-blur-md border border-slate-200 text-indigo-600 shadow-sm">
-          {elem.category}
-        </span>
+        {elem.category && (
+          <span className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-white/90 backdrop-blur-md border border-slate-200 text-indigo-600 shadow-sm pointer-events-none">
+            {elem.category}
+          </span>
+        )}
       </div>
 
       {/* Body */}
-      <div className="p-5 flex-1 flex flex-col justify-between">
+      <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between gap-2 sm:gap-3">
         <div>
-          <h2 className="text-base font-bold text-slate-900 mb-2 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+          <h2
+            className="text-xs sm:text-base font-bold text-slate-900 mb-1 sm:mb-2 line-clamp-1 group-hover:text-indigo-600 transition-colors"
+            title={elem.title}
+          >
             {elem.title}
           </h2>
-          <p className="text-xs text-slate-500 mb-4 line-clamp-2 leading-relaxed">
+          <p
+            className="text-[11px] sm:text-xs text-slate-500 mb-1 sm:mb-2 line-clamp-2 leading-relaxed"
+            title={elem.description}
+          >
             {elem.description}
           </p>
         </div>
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-          <span className="text-lg font-extrabold text-slate-900">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 sm:pt-3 border-t border-slate-100 mt-auto">
+          <span className="text-sm sm:text-lg font-extrabold text-slate-900 whitespace-nowrap">
             ₹{elem.price}
           </span>
           <button
@@ -87,7 +97,7 @@ const ProductCard = memo(({ elem, onAddToCart, onProductClick }) => {
               e.stopPropagation();
               onAddToCart(elem);
             }}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-md hover:shadow-indigo-200 transition-all duration-200 cursor-pointer"
+            className="w-full sm:w-auto px-2.5 sm:px-4 py-1.5 sm:py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] sm:text-xs font-semibold rounded-lg sm:rounded-xl shadow-sm sm:shadow-md hover:shadow-indigo-200 transition-all duration-200 cursor-pointer whitespace-nowrap flex-shrink-0 text-center justify-center"
           >
             Add to Cart
           </button>
@@ -324,7 +334,7 @@ function Allproducts() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 max-w-7xl mx-auto">
               {filteredProducts.map((elem) => (
                 <ProductCard
                   key={elem._id}

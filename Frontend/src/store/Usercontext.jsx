@@ -10,48 +10,34 @@ export const Providerfun = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [cartitem, setCartitem] = useState([]);
   const [token, setToken] = useState("");
-  const [editproduct, setEditproduct] = useState([]);
-
-  const func = async () => {
-    try {
-      const res = await axios.post(
-        `${API_BASE_URL}/api/v1/tokenData/regen`,
-        {},
-        { withCredentials: true, timeout: 2500 }
-      );
-      setUser(res.data.user);
-      setToken(res.data.token);
-    } catch {
-      setUser(null);
-      setToken("");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    func();
+    const init = async () => {
+      try {
+        const res = await axios.post(
+          `${API_BASE_URL}/api/v1/tokenData/regen`,
+          {},
+          { withCredentials: true, timeout: 2500 }
+        );
+        setUser(res.data.user);
+        setToken(res.data.token);
+      } catch {
+        setUser(null);
+        setToken("");
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
   }, []);
 
   return (
     <Usercontext.Provider
-      value={{
-        user,
-        setUser,
-        loading,
-        cartitem,
-        setCartitem,
-        token,
-        setToken,
-        editproduct,
-        setEditproduct,
-      }}
+      value={{ user, setUser, loading, cartitem, setCartitem, token, setToken }}
     >
       {children}
     </Usercontext.Provider>
   );
 };
 
-export const useUser = () => {
-  return useContext(Usercontext);
-};
+export const useUser = () => useContext(Usercontext);

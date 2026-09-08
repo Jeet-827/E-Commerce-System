@@ -44,7 +44,7 @@ function Login() {
       <div className="auth-card">
         <div className="auth-brand">
           <div className="auth-brand-icon">⚡</div>
-          <span className="auth-brand-name">E-System</span>
+          <span className="auth-brand-name text-black">E-System</span>
         </div>
 
         <div className="auth-header">

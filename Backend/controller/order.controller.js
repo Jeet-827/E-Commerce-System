@@ -13,15 +13,10 @@ export const OrderCreate = async (req, res) => {
       status: "pending",
     });
 
-    res.status(201).json({
-      message: "Order Created",
-      order,
-    });
+    res.status(201).json({ message: "Order Created", order });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("OrderCreate:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -33,16 +28,10 @@ export const showOrder = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    res.status(200).json({
-      message: "orders",
-      orders,
-      data: orders,
-    });
+    res.status(200).json({ message: "Orders fetched", orders });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("showOrder:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -57,16 +46,10 @@ export const getUserOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    res.status(200).json({
-      message: "User orders",
-      orders,
-      data: orders,
-    });
+    res.status(200).json({ message: "User orders", orders });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("getUserOrders:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -78,19 +61,12 @@ export const getOrderById = async (req, res) => {
       .populate("productid")
       .lean();
 
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+    if (!order) return res.status(404).json({ message: "Order not found" });
 
-    res.status(200).json({
-      message: "Order Details",
-      order,
-    });
+    res.status(200).json({ message: "Order details", order });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("getOrderById:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -99,26 +75,12 @@ export const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const order = await Order.findByIdAndUpdate(
-      id,
-      { status },
-      { returnDocument: 'after' }
-    );
+    const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
+    if (!order) return res.status(404).json({ message: "Order not found" });
 
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-
-    res.status(200).json({
-      message: "Status updated successfully",
-      order,
-    });
+    res.status(200).json({ message: "Status updated successfully", order });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error("updateOrderStatus:", error.message);
+    res.status(500).json({ message: error.message });
   }
 };
-
-

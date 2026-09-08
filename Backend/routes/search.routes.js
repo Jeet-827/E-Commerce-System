@@ -1,9 +1,8 @@
-import express from "express"
-import {Serach, showorder} from "../controller/search.controller.js"
+import express from "express";
+import { Search, showorder } from "../controller/search.controller.js";
 
-
-const SearchRoute=express.Router()
-SearchRoute.get("/search",Serach)
-SearchRoute.post("/showorder",showorder)
+const SearchRoute = express.Router();
+SearchRoute.get("/search", Search);
+SearchRoute.post("/showorder", showorder);
 
 export default SearchRoute;
