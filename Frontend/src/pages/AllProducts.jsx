@@ -44,7 +44,7 @@ const ProductCard = memo(({ elem, onAddToCart, onProductClick }) => {
       className="group bg-white border border-slate-200 rounded-2xl overflow-hidden hover:-translate-y-1.5 hover:shadow-xl hover:border-indigo-300 transition-all duration-300 flex flex-col justify-between cursor-pointer"
     >
       {/* Image */}
-      <div className="relative w-full h-52 bg-slate-100 overflow-hidden">
+      <div className="relative w-full h-36 sm:h-52 bg-slate-100 overflow-hidden">
         {imgSrc ? (
           <img
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -287,14 +287,14 @@ function Allproducts() {
           </div>
 
           {/* Category Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3">
+          <div className="w-full flex overflow-x-auto gap-2 md:gap-3 pb-2 md:pb-0 md:flex-wrap md:justify-center scrollbar-none snap-x">
             {CATEGORIES.map((cat) => {
               const isActive = selectedcategory === cat.id;
               return (
                 <button
                   key={cat.id}
                   onClick={() => handleCategoryChange(cat.id)}
-                  className={`px-4 py-2 rounded-full border text-xs md:text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                  className={`shrink-0 snap-start px-4 py-2 rounded-full border text-xs md:text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
                     isActive
                       ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200 scale-105"
                       : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
@@ -324,7 +324,7 @@ function Allproducts() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 max-w-7xl mx-auto">
               {filteredProducts.map((elem) => (
                 <ProductCard
                   key={elem._id}

@@ -418,12 +418,12 @@ const Profile = () => {
 
         {/* Layout Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="md:col-span-1 bg-white border border-slate-200 rounded-3xl p-4 shadow-sm h-fit">
-            <nav className="space-y-1.5">
+          {/* Sidebar Tabs */}
+          <div className="md:col-span-1 bg-white border border-slate-200 rounded-3xl p-3 md:p-4 shadow-sm h-fit">
+            <nav className="flex md:flex-col overflow-x-auto scrollbar-none gap-2 md:space-y-1.5 snap-x">
               <button
                 onClick={() => setActiveTab("edit details")}
-                className={`w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center gap-3 ${
+                className={`shrink-0 snap-start px-4 py-3 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center gap-2.5 ${
                   activeTab === "edit details"
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -435,7 +435,7 @@ const Profile = () => {
 
               <button
                 onClick={() => setActiveTab("Change pass")}
-                className={`w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center gap-3 ${
+                className={`shrink-0 snap-start px-4 py-3 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center gap-2.5 ${
                   activeTab === "Change pass"
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -447,7 +447,7 @@ const Profile = () => {
 
               <button
                 onClick={() => setActiveTab("My order page")}
-                className={`w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center gap-3 ${
+                className={`shrink-0 snap-start px-4 py-3 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center gap-2.5 ${
                   activeTab === "My order page"
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -455,6 +455,18 @@ const Profile = () => {
               >
                 <span>📦</span>
                 <span>My Orders</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setUser(null);
+                  setToken("");
+                  navigate("/login");
+                }}
+                className={`shrink-0 snap-start px-4 py-3 rounded-2xl font-bold text-sm text-rose-600 hover:bg-rose-50 transition-all duration-200 flex items-center gap-2.5`}
+              >
+                <span>🚪</span>
+                <span>Logout</span>
               </button>
             </nav>
           </div>
