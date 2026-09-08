@@ -4,40 +4,57 @@ import { ADMIN_API_BASE_URL } from "../config/api.config.js";
 import { Navigate, Outlet } from "react-router-dom";
 
 const Protectadmin = () => {
-  // Initialize isAdmin from localStorage so page reload does not kick out logged-in Admin
-  const [isAdmin, setIsAdmin] = useState(() => {
-    return localStorage.getItem("adminLoggedIn") === "true";
-  });
-  const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkAdmin = async () => {
       try {
-        const res = await axios.post(
-          `${ADMIN_API_BASE_URL}/api/v1/admin/protected`,
-          {},
-          { withCredentials: true, timeout: 4000 }
-        );
+        setLoading(true);
+        // Pure cookie-based authentication verification (GET / POST with withCredentials)
+        let res;
+        try {
+          res = await axios.get(`${ADMIN_API_BASE_URL}/api/v1/admin/protected`, {
+            withCredentials: true,
+            timeout: 5000,
+          });
+        } catch {
+          res = await axios.post(
+            `${ADMIN_API_BASE_URL}/api/v1/admin/protected`,
+            {},
+            { withCredentials: true, timeout: 5000 }
+          );
+        }
 
-        if (res.status === 200 && res.data.success === true) {
-          setIsAdmin(true);
-          localStorage.setItem("adminLoggedIn", "true");
+        if (isMounted) {
+          if (res.status === 200 && res.data.success === true) {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
         }
       } catch (error) {
-        // Only kick out if server explicitly responds with 401 (unauthorized)
-        if (error.response && error.response.status === 401) {
+        if (isMounted) {
+          console.log("Admin session check:", error?.response?.data?.message || error.message);
           setIsAdmin(false);
-          localStorage.removeItem("adminLoggedIn");
         }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     checkAdmin();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  if (loading && isAdmin === null) {
+  if (loading || isAdmin === null) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center text-slate-600 font-sans">
         <div className="flex items-center gap-3">

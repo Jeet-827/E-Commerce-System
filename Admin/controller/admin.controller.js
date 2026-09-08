@@ -6,7 +6,16 @@ export const Signin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const Adminfun = await Admin.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
+
+    const cleanEmail = email.trim();
+    const Adminfun = await Admin.findOne({
+      email: { $regex: new RegExp(`^${cleanEmail}$`, "i") },
+    });
 
     if (!Adminfun) {
       return res.status(401).json({
@@ -15,25 +24,32 @@ export const Signin = async (req, res) => {
     }
 
     const Ispassword = await bcrypt.compare(password, Adminfun.password);
-    if (Adminfun.role !== "Admin" || !Ispassword) {
+    if (Adminfun.role?.toLowerCase() !== "admin" || !Ispassword) {
       return res.status(401).json({
         message: "Email and Password Are wrong Please try Again",
       });
     }
 
     const token = jwt.sign({ id: Adminfun._id }, process.env.ADMINKEY, {
-      expiresIn: "1h",
+      expiresIn: "7d",
     });
 
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Admin Login Succesfully",
+      success: true,
+      token,
+      admin: {
+        id: Adminfun._id,
+        email: Adminfun.email,
+        role: Adminfun.role,
+      },
     });
   } catch (error) {
     return res.status(501).json({
@@ -133,20 +149,21 @@ export const adminupdate = async (req, res) => {
 };
 
 
-export const AdminLogout=async(req,res)=>{
-try {
-      res.clearCookie("token",{
-         httpOnly:true,
-         sameSite:"lax",
-      });
+export const AdminLogout = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
 
-      return res.status(200).json({
-         message:"Admin Logout Successfully",
-      });
-
-} catch (error) {
-    return res.status(501).json({
-       message:error.message,
-    })
-}
-}
+    return res.status(200).json({
+      message: "Admin Logout Successfully",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};

@@ -3,10 +3,19 @@ import jwt from "jsonwebtoken";
 
 export const Protected = async (req, res) => {
   try {
-    const token = req.cookies?.token;
+    let token = req.cookies?.token;
+
+    if (!token && req.headers?.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token && req.body?.token) {
+      token = req.body.token;
+    }
+
     if (!token) {
       return res.status(401).json({
-        message: "something wrong",
+        message: "Authentication token missing",
         success: false,
       });
     }
@@ -23,10 +32,17 @@ export const Protected = async (req, res) => {
       message: "Login",
       success: true,
       email: admin.email,
+      admin: {
+        id: admin._id,
+        email: admin.email,
+        role: admin.role,
+      },
     });
   } catch (error) {
-    return res.status(501).json({
-      message: error.message,
+    return res.status(401).json({
+      message: "Invalid or expired admin session",
+      success: false,
+      error: error.message,
     });
   }
 };
