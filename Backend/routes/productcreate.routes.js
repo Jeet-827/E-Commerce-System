@@ -1,0 +1,8 @@
+import express from "express";
+ import upload from "../middleware/multer.middlware.js";
+import {CreateProduct} from "../controller/product.controller.js"
+const productcreate=express.Router()
+
+productcreate.post("/createproduct", upload.single("file"), CreateProduct)
+
+export default productcreate;

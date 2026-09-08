@@ -1,0 +1,142 @@
+import Admin from "../models/admin.model.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+
+export const Signin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const Adminfun = await Admin.findOne({ email });
+
+    if (!Adminfun) {
+      return res.status(401).json({
+        message: "Email not Valid",
+      });
+    }
+
+    const Ispassword = await bcrypt.compare(password, Adminfun.password);
+    if (Adminfun.role !== "Admin" || !Ispassword) {
+      return res.status(401).json({
+        message: "Email and Password Are wrong Please try Again",
+      });
+    }
+
+    const token = jwt.sign({ id: Adminfun._id }, process.env.ADMINKEY, {
+      expiresIn: "1h",
+    });
+
+    res.cookie("token", token);
+
+    return res.status(201).json({
+      message: "Admin Login Succesfully",
+    });
+  } catch (error) {
+    return res.status(501).json({
+      message: error.message,
+    });
+  }
+};
+
+export const Admincreate = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const Adminfun = await Admin.findOne({ email });
+    // const id = Adminfun._id
+    if (Adminfun) {
+      return res.status(401).json({
+        message: "Email not Valid",
+      });
+    }
+
+    const Ispassword = await bcrypt.hash(password, 10);
+    const admin = await Admin.create({
+      email,
+      password: Ispassword,
+    });
+
+    const token = jwt.sign({ id: admin._id }, process.env.ADMINKEY, {
+      expiresIn: "1h",
+    });
+
+    res.cookie("token", token);
+
+    return res.status(201).json({
+      message: "Admin create Succesfuuly",
+    });
+  } catch (error) {
+    return res.status(501).json({
+      message: error.message,
+    });
+  }
+};
+
+export const adminupdate = async (req, res) => {
+  try {
+    const { password, newpassword, email } = req.body;
+
+    let Emailcheack = null;
+    if (email) {
+      Emailcheack = await Admin.findOne({ email });
+    } else if (req.cookies?.token) {
+      try {
+        const decoded = jwt.verify(req.cookies.token, process.env.ADMINKEY);
+        if (decoded?.id) {
+          Emailcheack = await Admin.findById(decoded.id);
+        }
+      } catch (err) {
+        console.log("Token verify err:", err.message);
+      }
+    }
+
+    if (!Emailcheack) {
+      Emailcheack = await Admin.findOne();
+    }
+
+    if (!Emailcheack) {
+      return res.status(404).json({
+        message: "something wrong",
+      });
+    }
+
+    const pass = await bcrypt.compare(password, Emailcheack.password);
+
+    if (!pass) {
+      return res.status(400).json({
+        message: "Current password is wrong",
+      });
+    }
+
+    const hash = await bcrypt.hash(newpassword, 10);
+    await Admin.findByIdAndUpdate(
+      Emailcheack._id,
+      { password: hash },
+    );
+    return res.status(201).json({
+      message: "Password Updated",
+    });
+  } catch (error) {
+    return res.status(501).json({
+      message: error.message,
+    });
+  }
+};
+
+
+export const AdminLogout=async(req,res)=>{
+try {
+      res.clearCookie("token",{
+         httpOnly:true,
+         sameSite:"lax",
+      });
+
+      return res.status(200).json({
+         message:"Admin Logout Successfully",
+      });
+
+} catch (error) {
+    return res.status(501).json({
+       message:error.message,
+    })
+}
+}
