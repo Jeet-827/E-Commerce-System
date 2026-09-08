@@ -30,7 +30,7 @@ const Logout = () => {
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      // 1. Call backend logout API to clear admin session cookie
+      // Call backend logout API to clear admin session cookie
       await axios.post(
         `${ADMIN_API_BASE_URL}/api/v1/admin/adminlogout`,
         {},
@@ -39,7 +39,6 @@ const Logout = () => {
     } catch (error) {
       console.error("Admin logout failed:", error);
     } finally {
-      // 2. Always redirect admin to Admin Login page (/admin)
       setLoggingOut(false);
       navigate("/admin", { replace: true });
     }

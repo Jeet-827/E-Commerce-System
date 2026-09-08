@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { API_BASE_URL } from "../config/api.config.js";
+import { ADMIN_API_BASE_URL, API_BASE_URL } from "../config/api.config.js";
 import { useNavigate } from "react-router-dom";
 import Nav from "./Nav";
 import { ToastContainer, toast } from "react-toastify";
@@ -11,14 +11,21 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  /* Fetch all orders from backend */
+  /* Fetch all orders from admin backend */
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        `${API_BASE_URL}/api/v1/order/showorder`
-      );
-      setOrders(res.data.orders || res.data.order || res.data.data || []);
+      let res;
+      try {
+        res = await axios.get(`${ADMIN_API_BASE_URL}/api/v1/order/showorder`, {
+          withCredentials: true,
+        });
+      } catch {
+        res = await axios.get(`${API_BASE_URL}/api/v1/order/showorder`, {
+          withCredentials: true,
+        });
+      }
+      setOrders(res.data.orders || res.data.Od || res.data.order || res.data.data || []);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
       toast.error("Failed to load orders");
@@ -34,10 +41,19 @@ const Orders = () => {
   /* Handle status update (pending / shipping / delivered) */
   const handleStatusChange = useCallback(async (orderId, newStatus) => {
     try {
-      await axios.put(
-        `${API_BASE_URL}/api/v1/order/updatestatus/${orderId}`,
-        { status: newStatus }
-      );
+      try {
+        await axios.put(
+          `${ADMIN_API_BASE_URL}/api/v1/order/updatestatus/${orderId}`,
+          { status: newStatus },
+          { withCredentials: true }
+        );
+      } catch {
+        await axios.put(
+          `${API_BASE_URL}/api/v1/order/updatestatus/${orderId}`,
+          { status: newStatus },
+          { withCredentials: true }
+        );
+      }
       toast.success(`Order status updated to ${newStatus}`);
       setOrders((prev) =>
         prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))

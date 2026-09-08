@@ -13,12 +13,26 @@ import TokenModel from "./routes/token.routes.js";
 import OrderRoute from "./routes/order.routes.js";
 import SearchRoute from "./routes/search.routes.js";
 import RazorPay from "./routes/razor.routes.js";
+import AdminRoutes from "./routes/admin.routes.js";
+import EditRouter from "./routes/editproduct.routes.js";
+import Alluser from "./routes/alluserget.routes.js";
+import { getCacheStats, flushAllCache } from "./utils/cache.js";
+import { executeInWorkerThread } from "./services/worker.service.js";
 
 const app = express();
 
 // Security & performance
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
-app.use(compression());
+app.use(
+  compression({
+    level: 6,
+    threshold: 1024,
+    filter: (req, res) => {
+      if (req.headers["x-no-compression"]) return false;
+      return compression.filter(req, res);
+    },
+  })
+);
 
 // CORS
 const allowedOrigins = [
@@ -34,15 +48,15 @@ app.use(
       if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(null, origin || true);
       }
     },
     credentials: true,
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
 // Cache-Control for product GET APIs
@@ -63,6 +77,41 @@ app.use("/api/v1/tokenData", TokenModel);
 app.use("/api/v1/order", OrderRoute);
 app.use("/api/v1/search", SearchRoute);
 app.use("/api/v1/make", RazorPay);
+app.use("/api/v1/admin", AdminRoutes);
+app.use("/api/v1/edit", EditRouter);
+app.use("/api/v1/user", Alluser);
+app.use("/api/v1/alluser", Alluser);
+
+// Cache Monitoring & Control Routes
+app.get("/api/v1/cache/stats", (req, res) => {
+  res.json({
+    message: "Cache statistics",
+    stats: getCacheStats(),
+  });
+});
+
+app.post("/api/v1/cache/flush", (req, res) => {
+  flushAllCache();
+  res.json({ message: "Cache flushed successfully" });
+});
+
+// Worker Thread Direct Task Execution & Benchmark
+app.post("/api/v1/worker/benchmark", async (req, res) => {
+  try {
+    const iterations = req.body.iterations || 1000000;
+    const startTime = Date.now();
+    const result = await executeInWorkerThread("HEAVY_COMPUTATION", { iterations });
+    const duration = Date.now() - startTime;
+
+    res.json({
+      message: "Heavy computation processed in isolated Worker Thread",
+      durationMs: duration,
+      result,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("server is running");

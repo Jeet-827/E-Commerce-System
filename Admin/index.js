@@ -1,9 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import compression from "compression";
 import helmet from "helmet";
-import cookieParser from "cookie-parser";
 import DBConnect from "./config/db.config.js";
 import Showorder from "./routes/order.routes.js";
 import AdminRoutes from "./routes/admin.routes.js";
@@ -11,10 +11,16 @@ import Alluser from "./routes/alluserget.routes.js";
 import EditRouter from "./routes/editproduct.routes.js";
 
 const app = express();
+DBConnect();
 
-// Security & performance
+// Security & compression
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
-app.use(compression());
+app.use(
+  compression({
+    level: 6,
+    threshold: 1024,
+  })
+);
 
 // CORS
 const allowedOrigins = [
@@ -30,7 +36,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(null, origin || true);
       }
     },
     credentials: true,
@@ -38,10 +44,8 @@ app.use(
 );
 
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-DBConnect();
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use("/api/v1/admin", AdminRoutes);
 app.use("/api/v1/order", Showorder);

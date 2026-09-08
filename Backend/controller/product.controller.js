@@ -1,5 +1,6 @@
 import Product from "../model/product.model.js";
 import imagekit from "../config/imagekit.config.js";
+import { clearCachePattern } from "../utils/cache.js";
 
 // Simple in-memory cache (TTL: 60 seconds)
 const cache = new Map();
@@ -8,11 +9,21 @@ const CACHE_TTL = 60 * 1000;
 const getCache = (key) => {
   const entry = cache.get(key);
   if (!entry) return null;
-  if (Date.now() - entry.ts > CACHE_TTL) { cache.delete(key); return null; }
+  if (Date.now() - entry.ts > CACHE_TTL) {
+    cache.delete(key);
+    return null;
+  }
   return entry.data;
 };
 const setCache = (key, data) => cache.set(key, { data, ts: Date.now() });
-const invalidateCache = () => cache.clear();
+const invalidateCache = () => {
+  cache.clear();
+  try {
+    clearCachePattern("/product");
+    clearCachePattern("/categories");
+    clearCachePattern("/search");
+  } catch {}
+};
 
 export const GetAllProduct = async (req, res) => {
   try {

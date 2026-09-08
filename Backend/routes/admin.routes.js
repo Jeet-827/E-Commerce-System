@@ -1,10 +1,11 @@
-import { Signin, adminupdate, AdminLogout } from "../controller/admin.controller.js";
+import { Signin, adminupdate, AdminLogout, Admincreate } from "../controller/admin.controller.js";
 import { Protected } from "../controller/admintoken.controller.js";
 import express from "express";
 
 const AdminRoutes = express.Router();
 
 AdminRoutes.post("/adminsignin", Signin);
+AdminRoutes.post("/admincreate", Admincreate);
 AdminRoutes.get("/protected", Protected);
 AdminRoutes.post("/protected", Protected);
 AdminRoutes.post("/updatepass", adminupdate);

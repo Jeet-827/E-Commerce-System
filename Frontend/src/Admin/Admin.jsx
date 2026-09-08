@@ -19,7 +19,7 @@ function Admin() {
     try {
       const res = await axios.post(
         `${ADMIN_API_BASE_URL}/api/v1/admin/adminsignin`,
-        { email, password },
+        { email: email.trim(), password },
         { withCredentials: true }
       );
 
@@ -29,8 +29,8 @@ function Admin() {
       });
 
       setTimeout(() => {
-        navigate("/dashboard");
-      }, 800);
+        navigate("/dashboard", { replace: true });
+      }, 300);
     } catch (error) {
       const errMsg =
         error.response?.data?.message || "Invalid email or password. Please try again.";

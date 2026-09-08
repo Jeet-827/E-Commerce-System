@@ -1,4 +1,4 @@
-import Admin from "../models/admin.model.js";
+import Admin from "../model/admin.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -30,7 +30,7 @@ export const Signin = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: Adminfun._id }, process.env.ADMINKEY, {
+    const token = jwt.sign({ id: Adminfun._id }, process.env.ADMINKEY || "admin_secret", {
       expiresIn: "7d",
     });
 
@@ -52,7 +52,7 @@ export const Signin = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(501).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -63,7 +63,6 @@ export const Admincreate = async (req, res) => {
     const { email, password } = req.body;
 
     const Adminfun = await Admin.findOne({ email });
-    // const id = Adminfun._id
     if (Adminfun) {
       return res.status(401).json({
         message: "Email not Valid",
@@ -76,22 +75,23 @@ export const Admincreate = async (req, res) => {
       password: Ispassword,
     });
 
-    const token = jwt.sign({ id: admin._id }, process.env.ADMINKEY, {
-      expiresIn: "1h",
+    const token = jwt.sign({ id: admin._id }, process.env.ADMINKEY || "admin_secret", {
+      expiresIn: "7d",
     });
 
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(201).json({
       message: "Admin create Succesfuuly",
+      token,
     });
   } catch (error) {
-    return res.status(501).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
@@ -106,7 +106,7 @@ export const adminupdate = async (req, res) => {
       Emailcheack = await Admin.findOne({ email });
     } else if (req.cookies?.token) {
       try {
-        const decoded = jwt.verify(req.cookies.token, process.env.ADMINKEY);
+        const decoded = jwt.verify(req.cookies.token, process.env.ADMINKEY || "admin_secret");
         if (decoded?.id) {
           Emailcheack = await Admin.findById(decoded.id);
         }
@@ -134,20 +134,16 @@ export const adminupdate = async (req, res) => {
     }
 
     const hash = await bcrypt.hash(newpassword, 10);
-    await Admin.findByIdAndUpdate(
-      Emailcheack._id,
-      { password: hash },
-    );
-    return res.status(201).json({
+    await Admin.findByIdAndUpdate(Emailcheack._id, { password: hash });
+    return res.status(200).json({
       message: "Password Updated",
     });
   } catch (error) {
-    return res.status(501).json({
+    return res.status(500).json({
       message: error.message,
     });
   }
 };
-
 
 export const AdminLogout = async (req, res) => {
   try {

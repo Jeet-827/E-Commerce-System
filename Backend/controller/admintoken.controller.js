@@ -1,4 +1,4 @@
-import Admin from "../models/admin.model.js";
+import Admin from "../model/admin.model.js";
 import jwt from "jsonwebtoken";
 
 export const Protected = async (req, res) => {
@@ -20,7 +20,7 @@ export const Protected = async (req, res) => {
       });
     }
 
-    const varify = jwt.verify(token, process.env.ADMINKEY);
+    const varify = jwt.verify(token, process.env.ADMINKEY || "admin_secret");
     const admin = await Admin.findById(varify.id).select("-password");
     if (!admin) {
       return res.status(401).json({

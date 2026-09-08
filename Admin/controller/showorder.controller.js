@@ -3,10 +3,12 @@ import "../models/product.model.js";
 
 export const showorder = async (req, res) => {
   try {
-    const Od = await Order.find({}).populate("productid userid");
+    const Od = await Order.find({}).populate("productid userid").sort({ createdAt: -1 }).lean();
     res.status(200).json({
       message: "All Product Find",
       Od,
+      orders: Od,
+      data: Od,
     });
   } catch (error) {
     res.status(500).json({

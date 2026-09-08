@@ -2,12 +2,18 @@ import mongoose from "mongoose";
 
 const DBConnect = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URL, { bufferCommands: false });
-    if (process.env.NODE_ENV !== "production") {
-      console.log("MongoDB connected");
-    }
+    const options = {
+      maxPoolSize: 50,
+      minPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4,
+    };
+
+    await mongoose.connect(process.env.MONGO_URL, options);
+    console.log("✅ Admin MongoDB Connected with optimized connection pool");
   } catch (error) {
-    console.error("MongoDB connection error:", error.message);
+    console.error("❌ Admin MongoDB Connection Error:", error);
     process.exit(1);
   }
 };

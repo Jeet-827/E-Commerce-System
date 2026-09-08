@@ -8,31 +8,53 @@ const Protectadmin = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkAdmin = async () => {
       try {
-        const res = await axios.post(
-          `${ADMIN_API_BASE_URL}/api/v1/admin/protected`,
-          {},
-          { withCredentials: true }
-        );
+        setLoading(true);
+        // Pure cookie-based authentication verification (GET / POST with withCredentials)
+        let res;
+        try {
+          res = await axios.get(`${ADMIN_API_BASE_URL}/api/v1/admin/protected`, {
+            withCredentials: true,
+            timeout: 5000,
+          });
+        } catch {
+          res = await axios.post(
+            `${ADMIN_API_BASE_URL}/api/v1/admin/protected`,
+            {},
+            { withCredentials: true, timeout: 5000 }
+          );
+        }
 
-        if (res.status === 200 && res.data.success === true) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
+        if (isMounted) {
+          if (res.status === 200 && res.data.success === true) {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
         }
       } catch (error) {
-        console.log("Admin auth verification failed:", error);
-        setIsAdmin(false);
+        if (isMounted) {
+          console.log("Admin session check:", error?.response?.data?.message || error.message);
+          setIsAdmin(false);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     checkAdmin();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  if (loading) {
+  if (loading || isAdmin === null) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center text-slate-600 font-sans">
         <div className="flex items-center gap-3">

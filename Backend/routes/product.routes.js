@@ -6,13 +6,15 @@ import {
   DeleteProduct,
 } from "../controller/product.controller.js";
 import express from "express";
+import { AuthMiddleware } from "../middleware/auth.middleware.js";
+import { cacheMiddleware } from "../middleware/cache.middleware.js";
 
-import {AuthMiddleware} from '../middleware/auth.middleware.js'
 const ProductRoute = express.Router();
 
-ProductRoute.get("/productget", GetAllProduct);
-ProductRoute.get("/productget/:id", GetProductById);
-ProductRoute.get("/categories", GetCategories);
+// Cached GET routes for ultra-fast response times
+ProductRoute.get("/productget", cacheMiddleware(120), GetAllProduct);
+ProductRoute.get("/productget/:id", cacheMiddleware(300), GetProductById);
+ProductRoute.get("/categories", cacheMiddleware(600), GetCategories);
 ProductRoute.delete("/deleteproduct/:id", DeleteProduct);
 
 export default ProductRoute;
