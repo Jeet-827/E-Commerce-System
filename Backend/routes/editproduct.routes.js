@@ -1,6 +1,6 @@
 import express from "express";
 import { GetAllProduct, GetAllUpdate, DeleteProduct } from "../controller/editproduct.controller.js";
-import upload from "../middleware/multer.middlware.js";
+import upload from "../middleware/multer.middleware.js";
 
 const EditRouter = express.Router();
 

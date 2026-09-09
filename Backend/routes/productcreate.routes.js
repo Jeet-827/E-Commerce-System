@@ -1,5 +1,5 @@
 import express from "express";
- import upload from "../middleware/multer.middlware.js";
+ import upload from "../middleware/multer.middleware.js";
 import {CreateProduct} from "../controller/product.controller.js"
 const productcreate=express.Router()
 
